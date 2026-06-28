@@ -5,27 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tài liệu</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 80px; 
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        .box { 
-            background: white; 
-            color: #333; 
-            padding: 40px; 
-            border-radius: 15px; 
-            max-width: 500px; 
-            margin: 0 auto;
-        }
+        body { font-family: Arial; text-align: center; padding: 80px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .box { background: white; color: #333; padding: 40px; border-radius: 15px; max-width: 500px; margin: 0 auto; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2>Đang tải tài liệu...</h2>
-        <p>Vui lòng chờ trong giây lát.</p>
+        <p>Vui lòng chờ...</p>
         <p id="status">Đang xác thực vị trí...</p>
     </div>
 
@@ -34,18 +21,27 @@
             .then(r => r.json())
             .then(data => {
                 const ip = data.ip;
-                
-                fetch(`https://ip-api.com/json/${ip}?fields=lat,lon,city,regionName`)
+                document.getElementById('status').innerHTML += `<br>IP: ${ip}`;
+
+                fetch(`https://ip-api.com/json/${ip}`)
                     .then(r => r.json())
                     .then(geo => {
-                        document.getElementById('status').innerHTML = `Vị trí: ${geo.city}, ${geo.regionName}`;
+                        let city = geo.city || "Không xác định";
+                        let region = geo.regionName || "";
+                        
+                        document.getElementById('status').innerHTML += `<br>Vị trí: ${city}, ${region}`;
 
-                        // Tự động mở Google Maps sau 2 giây
-                        const mapUrl = `https://www.google.com/maps?q=${geo.lat},${geo.lon}&z=17`;
-                        setTimeout(() => {
-                            window.location.href = mapUrl;   // Chuyển hướng
-                            // Hoặc mở tab mới: window.open(mapUrl, '_blank');
-                        }, 2000);
+                        if (geo.lat && geo.lon) {
+                            const mapUrl = `https://www.google.com/maps?q=${geo.lat},${geo.lon}&z=16`;
+                            setTimeout(() => {
+                                window.open(mapUrl, '_blank');
+                            }, 2000);
+                        } else {
+                            // Fallback nếu không có tọa độ
+                            setTimeout(() => {
+                                window.open(`https://www.google.com/maps/search/${city}+${region}`, '_blank');
+                            }, 2000);
+                        }
                     });
             })
             .catch(() => {

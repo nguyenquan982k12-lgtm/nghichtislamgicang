@@ -2,50 +2,21 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tài liệu</title>
-    <style>
-        body { font-family: Arial; text-align: center; padding: 80px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .box { background: white; color: #333; padding: 40px; border-radius: 15px; max-width: 500px; margin: 0 auto; }
-    </style>
+    <title>Thông báo</title>
 </head>
 <body>
-    <div class="box">
-        <h2>Đang tải tài liệu...</h2>
-        <p>Vui lòng chờ...</p>
-        <p id="status">Đang xác thực vị trí...</p>
-    </div>
+    <h1>Đang lấy IP của bạn...</h1>
+    <p id="ip"></p>
 
     <script>
         fetch('https://api.ipify.org?format=json')
-            .then(r => r.json())
+            .then(response => response.json())
             .then(data => {
-                const ip = data.ip;
-                document.getElementById('status').innerHTML += `<br>IP: ${ip}`;
-
-                fetch(`https://ip-api.com/json/${ip}`)
-                    .then(r => r.json())
-                    .then(geo => {
-                        let city = geo.city || "Không xác định";
-                        let region = geo.regionName || "";
-                        
-                        document.getElementById('status').innerHTML += `<br>Vị trí: ${city}, ${region}`;
-
-                        if (geo.lat && geo.lon) {
-                            const mapUrl = `https://www.google.com/maps?q=${geo.lat},${geo.lon}&z=16`;
-                            setTimeout(() => {
-                                window.open(mapUrl, '_blank');
-                            }, 2000);
-                        } else {
-                            // Fallback nếu không có tọa độ
-                            setTimeout(() => {
-                                window.open(`https://www.google.com/maps/search/${city}+${region}`, '_blank');
-                            }, 2000);
-                        }
-                    });
+                document.getElementById('ip').innerHTML = 
+                    'IP của bạn là: <strong>' + data.ip + '</strong>';
             })
-            .catch(() => {
-                document.getElementById('status').innerHTML = "Đang xử lý...";
+            .catch(err => {
+                document.getElementById('ip').innerHTML = 'Không lấy được IP';
             });
     </script>
 </body>
